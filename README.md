@@ -1,31 +1,23 @@
 amr-player
+使用js来播放amr语音文件, 相对原库来说, 改进了一些非常难用的地方, 并加入了语音时长计算
 play remote amr format audio with JavaScript  
 
-inpired by https://github.com/yxl/opencore-amr-js  
+fork from https://github.com/alex374/amr-player
 
--- AmrPlayer --
+## usage
+```
+<script src="xxx/amrnb.js"></script>
+<script src="xxx/amrplayer.js"></script>
 
-params:   
-  >amr_url   
-  >download_success_cb (optional)   
-  >download_progress_cb (optional)   
-  
-props:   
-  >bool canPlay   
-  >bool isPlaying
-  
-methods:   
-  >play()   
-  >pause()   
-  >toggle() // play() when paused or pause() when playing   
-  >endWith(callback) // optional, fire callback with ended event
+...
 
-usage:
-    <script src="xxx/amrnb.js"></script>
-    <script src="xxx/amrplayer.js"></script>
-	  
-	var player = new AmrPlayer('http://xxx.com/xxx.amr');
-	player.endWith(function(){ console.log( xxx ) });
-	player.play();
-	// or player.pause();
-	// or player.toggle();
+var player = new AmrPlayer(amr.url); // after new, AmrPlayer will load amr file.
+player.then(function () { // the then()'s callback will be exec will fetching file completed
+    var duration = player.duration; // can get voice's duration 
+    player.play(); // play immediately
+    player.endedWith(function () {
+        player.pause(); // pause when ending, if not do this, will loop
+    });
+});
+
+```

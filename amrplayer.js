@@ -1,19 +1,22 @@
-
+/**
+ * Created by Alex on 17/2/6.
+ */
 /*
-* -- AmrPlayer --
-* params:
-*  1. amr_url
-*  2. download_success_cb (optional)
-*  3. download_progress_cb (optional)
-* props:
-*  1. bool canPlay
-*  2. bool isPlaying
-* methods:
-*  1. play()
-*  2. pause()
-*  3. toggle() // play() when paused or pause() when playing
-*  3. endWith(callback) // fire callback with ended event
-* */
+ * -- AmrPlayer --
+ * params:
+ *  1. amr_url
+ *  2. download_success_cb (optional)
+ *  3. download_progress_cb (optional)
+ * props:
+ *  1. bool canPlay
+ *  2. bool isPlaying
+ * methods:
+ *  1. play()
+ *  2. pause()
+ *  3. toggle() // play() when paused or pause() when playing
+ *  4. endWith(callback) // fire callback with ended event
+ *  5. then(callback) // will exec the callback when init completed
+ * */
 var AmrPlayer = function(amr_url, download_success_cb, download_progress_cb){
     this.init(amr_url, download_success_cb, download_progress_cb);
 };
@@ -24,6 +27,9 @@ AmrPlayer.prototype = {
         this.blob = null;
         this.canPlay = false;
         this.isPlaying = false;
+        this.initCallback = null;
+        this.isInited = false;
+        this.duration = 0; //sec
         var cnt = 0;
         this.ended_cb = function(){
             if(cnt === 0){
@@ -74,8 +80,9 @@ AmrPlayer.prototype = {
     },
     readAmrArray: function(array) {
         var samples = AMR.decode(array);
+        this.duration = samples.length/7790;
         if (!samples) {
-            alert('Failed to decode!');
+            alert('暂无法播放!');
             return;
         }
         this.readPcm(samples);
@@ -97,14 +104,21 @@ AmrPlayer.prototype = {
             self.ended_cb && self.ended_cb();
             self.genPLayer();
         };
+        if (!this.isInited) {
+            this.initCallback ? this.initCallback() : '';
+            this.isInited = true;
+        }
     },
     getAudioContext: function(){
         if (!this.audioContext) {
-            if(window.AudioContext) {
-                this.audioContext = new AudioContext();
-            } else {
-                this.audioContext = new window.webkitAudioContext();
+            if (window.audioContext === undefined) {
+                if(window.AudioContext) {
+                    window.audioContext = new AudioContext();
+                } else {
+                    window.audioContext = new window.webkitAudioContext();
+                }
             }
+            this.audioContext = window.audioContext;
         }
         return this.audioContext;
     },
@@ -134,5 +148,8 @@ AmrPlayer.prototype = {
     },
     warn: function(msg){
         console.warn(msg);
+    },
+    then: function(func) {
+        this.initCallback = func;
     }
 };
