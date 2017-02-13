@@ -14,7 +14,7 @@ fork from https://github.com/alex374/amr-player
 // js
 
 var player = new AmrPlayer(amr.url); // after new, AmrPlayer will fetch amr file.
-player.then(function () { // the then()'s callback will be exec will fetching file completed
+player.then(function () { // the then()'s callback will be executed will fetching file completed
     var duration = player.duration; // can get voice's duration 
     player.play(); // play immediately
     player.endedWith(function () {
